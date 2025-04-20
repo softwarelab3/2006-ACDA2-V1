@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+httpx
+bcrypt
+python-multipart
+pydantic[email]
+minio
+google-auth
+requests

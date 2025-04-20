@@ -1,0 +1,7 @@
+**/.DS_Store
+**/.venv
+**/__pycache__
+**/test.py
+**/.pytest_cache
+**/sql_app.db
+**/minio/data/.minio.sys

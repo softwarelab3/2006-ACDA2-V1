@@ -1,0 +1,58 @@
+services:
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: tanknam
+      MINIO_ROOT_PASSWORD: "12345678"
+    volumes:
+      - ./backend/app/minio/data:/data
+    command: server /data --console-address ":9001"
+  
+  mc:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+        sleep 5 &&
+        mc alias set local http://minio:9000 tanknam 12345678 &&
+        mc anonymous set download local/dish &&
+        mc anonymous set download local/profile-photo &&
+        mc anonymous set download local/stall &&
+        exit 0
+      "
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - minio
+    environment:
+      - MINIO_ROOT_USER=tanknam
+      - MINIO_ROOT_PASSWORD=12345678
+      - MINIO_ENDPOINT=minio:9000
+
+  websocket:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: websocket
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - backend
+    environment:
+      - MINIO_ENDPOINT=minio:9000
+    
